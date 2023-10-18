@@ -86,8 +86,16 @@ const jwt = require('jsonwebtoken');
         }
     };
 
+    const signout = (req,res)=>{
+        res.clearCookie('token');
+        return res.json({message : "user signout"})
+    }
+
+
+
 module.exports={
     getUsers,
     signup,
-    signin
+    signin,
+    signout
 };
