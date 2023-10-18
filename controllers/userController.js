@@ -2,6 +2,7 @@ const User = require('../models/user');
 const Role = require('../models/role');
 const bcryptjs = require('bcryptjs');
 const validator = require('validator');
+const jwt = require('jsonwebtoken');
 
     const  getUsers = (req,res) =>{
 
@@ -52,7 +53,41 @@ const validator = require('validator');
 
     }
 
+
+
+
+    const signin = async (req, res) => {
+        const { email, password } = req.body;
+    
+        try {
+            const user = await User.findOne({ email });
+            if (!user) {
+                return res.status(401).json({ error: 'Adresse e-mail ou mot de passe incorrect.' });
+            }
+    
+            const isPasswordValid = await bcryptjs.compare(password, user.password);
+            if (!isPasswordValid) {
+                return res.status(401).json({ error: 'Adresse e-mail ou mot de passe incorrect.' });
+            }
+    
+            const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+    
+
+            res.cookie('token',token, {expire : new Date() + 3600000 })
+            return res.json({ 
+                success: true, 
+                data: {
+                    userId: user.id,
+                    email: user.email,
+                    token: token,
+                  }, });
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    };
+
 module.exports={
     getUsers,
-    signup
+    signup,
+    signin
 };
