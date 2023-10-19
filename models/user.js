@@ -18,42 +18,18 @@ const userShcema = new mongoose.Schema({
         type: String,
         required:true
     },
-    // salt:{
-    //     type:String
-    // },
+
     role:{
         type : mongoose.Schema.Types.ObjectId,
         ref:"Role"
+    },
+    isVerified:{
+        type : Boolean,
+        default: false
     }
     
 })
 
-// userShcema.virtual('password')
-// .set((password)=>{
-//     this._password=password;
-//     // this.salt = uuid();
-//     this.hashed_password =this.cryptPassword(password)
-
-// })
-// .get(()=>{
-//     return this._password;
-// })
-// userShcema.methods = {
-//     cryptPassword: function(password){
-//         if(!password) return '';
-
-//         try{
-//             return crypto
-//             .createHmac('sha1',this.salt)
-//             .update(password)
-//             .digest('hex');
-//         }catch(error){
-//             return ''
-
-//         }
-//     }
-
-// }
 const User = mongoose.model("User",userShcema)
 
 

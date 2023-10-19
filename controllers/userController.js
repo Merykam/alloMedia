@@ -3,6 +3,7 @@ const Role = require('../models/role');
 const bcryptjs = require('bcryptjs');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
+const sendMail = require('../services/email');
 
     const  getUsers = (req,res) =>{
 
@@ -41,6 +42,8 @@ const jwt = require('jsonwebtoken');
             });
     
             await user.save();
+            const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+            sendMail(req.body.email,token);
             res.json({ success: true, message: 'Utilisateur enregistré avec succès.' });
         }catch (error) {
             res.status(500).json({ success: false, error: error.message });
@@ -91,11 +94,41 @@ const jwt = require('jsonwebtoken');
         return res.json({message : "user signout"})
     }
 
+    
+
+
+
+    const verifyEmail = async (req, res) => {
+        const token = req.params.token;
+        if(!token){
+            return res.json({error: 'finahowa token'})
+        }
+    
+        try {
+       
+            const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+            const userId = decodedToken.userId;
+
+          
+          
+            console.log(decodedToken);
+           
+            await User.findOneAndUpdate({ _id: userId }, { isVerified: true });
+
+
+            return res.json({success: 'Email has been verified successfully'})
+    
+        } catch (error) {
+            
+            res.status(400).json({ success: false, error: 'Lien de vérification invalide ou expiré.' });
+        }
+    };
 
 
 module.exports={
     getUsers,
     signup,
     signin,
-    signout
+    signout,
+    verifyEmail
 };
