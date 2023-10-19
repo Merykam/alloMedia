@@ -3,7 +3,8 @@ const Role = require('../models/role');
 const bcryptjs = require('bcryptjs');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
-const sendMail = require('../services/email');
+const  {sendMail,sendResetPasswordEmail} = require('../services/email');
+
 
     const  getUsers = (req,res) =>{
 
@@ -44,7 +45,7 @@ const sendMail = require('../services/email');
             await user.save();
             const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
             sendMail(req.body.email,token);
-            res.json({ success: true, message: 'Utilisateur enregistré avec succès.' });
+            res.json({ success: true, message: 'Check your email to verify.' });
         }catch (error) {
             res.status(500).json({ success: false, error: error.message });
         }
@@ -125,10 +126,70 @@ const sendMail = require('../services/email');
     };
 
 
+
+
+    const forgotPassword = async (req, res) => {
+        const { email } = req.body;
+        try {
+            const user = await User.findOne({ email });
+            if (!user) {
+                return res.status(404).json({ error: 'Utilisateur non trouvé.' });
+            }
+    
+            const resetToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+                expiresIn: '2h' // le jeton expirera dans 1 heure
+            });
+    
+           
+    
+            // Envoyez l'e-mail avec le lien de réinitialisation de mot de passe
+            const resetPasswordLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+            await sendResetPasswordEmail(email, resetPasswordLink);
+    
+            return res.json({ success: true, message: 'Instructions de réinitialisation de mot de passe envoyées par e-mail.' });
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    };
+    
+
+    const resetPassword = async (req, res) => {
+        const { token } = req.params;
+        const { newPassword } = req.body;
+    
+        try {
+    
+
+
+            const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+            const userId = decodedToken.userId;
+            console.log(userId);
+
+            const user = await User.findOne({ _id: userId });
+    
+            if (!user) {
+                return res.status(400).json({ error: 'Lien de réinitialisation invalide ou expiré.' });
+            }
+    
+            // Mettez à jour le mot de passe et réinitialisez les champs de jeton
+            const hashedPassword = await bcryptjs.hash(newPassword, 10);
+            await User.findOneAndUpdate({ _id: userId }, { password: hashedPassword });
+            // user.password = hashedPassword;
+            // await user.save();
+    
+            return res.json({ success: true, message: 'Mot de passe réinitialisé avec succès.' });
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    };
+
+
 module.exports={
     getUsers,
     signup,
     signin,
     signout,
-    verifyEmail
+    verifyEmail,
+    forgotPassword,
+    resetPassword
 };
