@@ -4,12 +4,12 @@ const bcryptjs = require('bcryptjs');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const  {sendMail,sendResetPasswordEmail} = require('../services/email');
+const client = require('../routes/client');
+const manager = require('../routes/manager');
+const livreur = require('../routes/livreur');
 
 
-    const  getUsers = (req,res) =>{
-
-        res.send("hellooo useeers");  
-    }
+ 
 
     const signup = async (req,res)=>{
        
@@ -75,16 +75,51 @@ const  {sendMail,sendResetPasswordEmail} = require('../services/email');
             }
     
             const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
-    
+            console.log(token);
 
-            res.cookie('token',token, {expire : new Date() + 3600000 })
-            return res.json({ 
-                success: true, 
-                data: {
-                    userId: user.id,
-                    email: user.email,
-                    token: token,
-                  }, });
+            if(res.cookie('token',token, {expire : new Date() + 3600000 })){
+                console.log('yess')
+            }else{
+                console.log(noooo);
+            }
+            // res.user = user;
+            const userId = user._id;
+
+            const userRole = await User.findById(userId)
+            .populate({
+              path: 'role',
+              select: 'name', // Select only the 'name' field from the 'roles' collection
+            });
+
+
+            console.log(`This is the role naame : ${userRole.role.name}`);
+
+
+            switch (userRole.role.name) {
+                case 'livreur':
+                    res.redirect('/api/livreur/dashboard')
+                  break;
+             
+                case 'client':
+                    res.redirect('/api/client/dashboard')
+                 break;
+
+                case 'manager':
+                    res.redirect('/api/manager/dashboard')
+                  break;
+
+                default:
+                  console.log(`the user has no role`);
+              }
+
+            
+            // return res.json({ 
+            //     success: true, 
+            //     data: {
+            //         userId: user.id,
+            //         email: user.email,
+            //         token: token,
+            //       }, });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
         }
@@ -137,12 +172,12 @@ const  {sendMail,sendResetPasswordEmail} = require('../services/email');
             }
     
             const resetToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-                expiresIn: '2h' // le jeton expirera dans 1 heure
+                expiresIn: '2h' 
             });
     
            
     
-            // Envoyez l'e-mail avec le lien de réinitialisation de mot de passe
+           
             const resetPasswordLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
             await sendResetPasswordEmail(email, resetPasswordLink);
     
@@ -171,7 +206,7 @@ const  {sendMail,sendResetPasswordEmail} = require('../services/email');
                 return res.status(400).json({ error: 'Lien de réinitialisation invalide ou expiré.' });
             }
     
-            // Mettez à jour le mot de passe et réinitialisez les champs de jeton
+            
             const hashedPassword = await bcryptjs.hash(newPassword, 10);
             await User.findOneAndUpdate({ _id: userId }, { password: hashedPassword });
             // user.password = hashedPassword;
@@ -185,7 +220,7 @@ const  {sendMail,sendResetPasswordEmail} = require('../services/email');
 
 
 module.exports={
-    getUsers,
+  
     signup,
     signin,
     signout,

@@ -1,0 +1,7 @@
+const HelloManager= (req,res)=>{
+
+    return res.json({message: "Helloo manager "})
+
+}
+
+module.exports=HelloManager;
