@@ -4,9 +4,7 @@ const bcryptjs = require('bcryptjs');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const  {sendMail,sendResetPasswordEmail} = require('../services/email');
-const client = require('../routes/client');
-const manager = require('../routes/manager');
-const livreur = require('../routes/livreur');
+
 
 
  
@@ -80,15 +78,15 @@ const livreur = require('../routes/livreur');
             if(res.cookie('token',token, {expire : new Date() + 3600000 })){
                 console.log('yess')
             }else{
-                console.log(noooo);
+                console.log('noooo');
             }
-            // res.user = user;
+          
             const userId = user._id;
 
             const userRole = await User.findById(userId)
             .populate({
               path: 'role',
-              select: 'name', // Select only the 'name' field from the 'roles' collection
+              select: 'name', 
             });
 
 

@@ -3,11 +3,6 @@ const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 
 
-
-
-
-
-
 const HelloClient=async (req,res)=>{
    
     const token = req.cookies.token;
@@ -21,7 +16,8 @@ const HelloClient=async (req,res)=>{
 
     console.log(user);
     
-    return res.json({message: `Helloo client ${user.name}`})
+    return res.json({message: `Helloo ${user.name} your role is : Client`})
+  
 }
 
 module.exports=HelloClient;

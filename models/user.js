@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-// const uuid = require('uuid/v1')
+
 const userShcema = new mongoose.Schema({
     name:{
         type : String,

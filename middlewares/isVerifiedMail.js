@@ -1,12 +1,10 @@
-
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 
+async function IsVerified(req, res, next) {
 
-const HelloManager=async (req,res)=>{
-   
     const token = req.cookies.token;
-
+    
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decodedToken.userId;
 
@@ -14,9 +12,14 @@ const HelloManager=async (req,res)=>{
 
     const user = await User.findOne({_id: userId });
 
-    console.log(user);
-    
-    return res.json({message: `Helloo ${user.name} your role is : Manager`})
+    if(!user.isVerified){
+        res.json({'message' : 'Verify your mail'});
+    }
+
+
+    next(); 
+
 }
 
-module.exports=HelloManager;
+
+module.exports=IsVerified;

@@ -11,11 +11,10 @@ const sendMail = async(email, token) => {
       });
     
       const info = await transport.sendMail({
-        from: '"AlloMedia 👻" <AllomMedia@gmail.com>', // sender address
-        to: email, // list of receivers
-        subject: "Verify Email", // Subject line
-        text: "hal3arrrr", // plain text body
-        html: `<a href="/api/users/activate/${token}">click here to verify</a>`, // html body
+        from: '"AlloMedia 👻" <AllomMedia@gmail.com>', 
+        to: email,
+        subject: "Verify Email", 
+        html: `<a href="/api/auth/activate/${token}">click here to verify</a>`, 
       });
 }
 

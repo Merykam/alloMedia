@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 require('dotenv').config();
 const mongoose = require('mongoose');
-const userRoute = require('./routes/users');
+const userRoute = require('./routes/auth');
 const roleRoute = require('./routes/role');
 const cookieParser = require('cookie-parser');
 const clientRoute = require('./routes/client');
@@ -22,7 +22,7 @@ mongoose.connect(process.env.DATABASE)
 .catch(()=>console.log('not connected'))
 
 
-app.use('/api/users',userRoute);
+app.use('/api/auth',userRoute);
 app.use('/api/roles',roleRoute);
 
 app.use('/api/livreur',livreurRoute);
