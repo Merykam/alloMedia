@@ -13,6 +13,8 @@ const  {sendMail,sendResetPasswordEmail} = require('../services/email');
        
         const { name, email, password } = req.body;
 
+      
+
         if (!validator.isLength(name, { min: 1, max: 255 })) {
             return res.status(400).json({ error: 'Le nom est requis.' });
         }
@@ -25,7 +27,15 @@ const  {sendMail,sendResetPasswordEmail} = require('../services/email');
             return res.status(400).json({ error: 'Le mot de passe doit avoir au moins 6 caractères.' });
         }
 
+      
+
         try{
+
+            const userdb = await User.findOne({ email });
+            if(userdb){
+                res.status(400);
+                // res.json({err :"user already exists" })
+            }
             let role = await Role.findOne({name:req.body.role});
           
             if(!role){
